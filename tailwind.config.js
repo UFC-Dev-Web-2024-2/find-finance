@@ -7,6 +7,12 @@ export default {
   ],
   theme: {
   	extend: {
+			container: {
+				padding: "2rem",
+        screens: {
+					xl: '1312px'
+				},
+			},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

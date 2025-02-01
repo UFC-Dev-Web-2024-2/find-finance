@@ -1,6 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  font-family: 'Inter', sans-serif; 
+  -webkit-font-smoothing: antialiased;
+}
+
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -62,5 +69,22 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  .h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 130%;
+  }
+
+  .p-ui {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .body-medium {
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.5rem;
   }
 }
