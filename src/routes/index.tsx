@@ -1,6 +1,7 @@
 import { PublicLayout } from "@/layout/public/public-layout";
 import { Navigate, Route, Routes as RoutesReactRouter } from "react-router";
 import { LoginPage } from "@/pages/public/login";
+import { DashboardPage } from "@/pages/private/dashboard";
 
 export function Routes() {
   return (
@@ -10,7 +11,7 @@ export function Routes() {
         <Route index path="login" element={<LoginPage />} />
       </Route>
 
-      <Route path="dashboard" element={<h1>Dashboard</h1>} />
+      <Route path="dashboard" element={<DashboardPage />} />
     </RoutesReactRouter>
   );
 }
