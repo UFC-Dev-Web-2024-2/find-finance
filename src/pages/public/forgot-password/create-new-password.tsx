@@ -53,7 +53,7 @@ export function CreateNewPasswordPage() {
             const formData = ForgotPasswordSchema.parse({ password, confirmPassword });
             await new Promise((resolve) => {
                 setTimeout(() => {
-                    return resolve(navigate("/dashboard"));
+                    return resolve(navigate("/c"));
                 }, 1000);
             });
         } catch (error) {
