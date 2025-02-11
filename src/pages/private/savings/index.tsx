@@ -1,6 +1,7 @@
-"use client";
-
 import * as React from "react";
+
+import { ArrowUpDown } from "lucide-react";
+
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -13,9 +14,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
-import { DialogExpense } from "@/components/dialogs/dialog-expense";
 
+import { DialogExpense } from "@/components/dialogs/dialog-expense";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -27,54 +27,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
-const data: Savings[] = [
-  {
-    id: "unique-id-1",
-    title: "Aluguel",
-    registerType: "expense",
-    description: "Pagamento do aluguel do apartamento",
-    value: 1500.0,
-    category: "Moradia",
-    date: "2025-02-28",
-  },
-  {
-    id: "unique-id-2",
-    title: "Venda de produto",
-    registerType: "income",
-    description: "Venda de um item no mercado livre",
-    value: 200.0,
-    category: "Vendas",
-    date: "2025-02-15",
-  },
-  {
-    id: "unique-id-3",
-    title: "Internet",
-    registerType: "expense",
-    description: "Pagamento mensal da internet",
-    value: 120.0,
-    category: "Serviços",
-    date: "2025-02-20",
-  },
-  {
-    id: "unique-id-4",
-    title: "Consultoria",
-    registerType: "expense",
-    description: "Pagamento de consultoria financeira",
-    value: 500.0,
-    category: "Serviços",
-    date: "2025-02-25",
-  },
-  {
-    id: "unique-id-5",
-    title: "Divulgação de produto",
-    registerType: "expense",
-    description: "Campanha de marketing no Instagram",
-    value: 300.0,
-    category: "Publicidade",
-    date: "2025-02-18",
-  },
-];
+import { useToast } from "@/hooks/use-toast";
+
+import { useExpense } from "@/context/ExpenseContext";
 
 export type Savings = {
   id: string;
@@ -85,6 +51,43 @@ export type Savings = {
   category: string;
   date: string;
 };
+
+interface DialogDeleteConfirmationProps {
+  onConfirm: () => void;
+}
+
+export function DialogDeleteConfirmation({
+  onConfirm,
+}: DialogDeleteConfirmationProps) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button size="sm" className="bg-red-500 text-white hover:bg-red-400">
+          Excluir Despesa
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Confirmar Exclusão</DialogTitle>
+          <DialogDescription>
+            Tem certeza de que deseja excluir as despesas selecionadas? Esta
+            ação não pode ser desfeita.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">Cancelar</Button>
+          </DialogClose>
+          <DialogClose asChild>
+            <Button className="bg-red-500 hover:bg-red-400" onClick={onConfirm}>
+              Excluir
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export const columns: ColumnDef<Savings>[] = [
   {
@@ -102,7 +105,9 @@ export const columns: ColumnDef<Savings>[] = [
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        onCheckedChange={(value) => {
+          row.toggleSelected(!!value);
+        }}
         aria-label="Select row"
       />
     ),
@@ -159,17 +164,22 @@ export const columns: ColumnDef<Savings>[] = [
 ];
 
 export function SavingsPage() {
+  const { toast } = useToast();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [rowSelection, setRowSelection] = React.useState<{
+    [key: string]: boolean;
+  }>({});
+  const { expenses, deleteExpenses } = useExpense();
 
   const table = useReactTable({
-    data,
+    data: expenses,
     columns,
+    getRowId: (row) => row.id.toString(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -185,6 +195,24 @@ export function SavingsPage() {
       rowSelection,
     },
   });
+
+  const handleDeleteSelectedRows = () => {
+    const selectedIds = Object.keys(rowSelection);
+    if (selectedIds.length > 0) {
+      deleteExpenses(selectedIds);
+      toast({
+        variant: "sucess",
+        description: "Despesas foram removidas com sucesso!",
+        duration: 3000,
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        description: "Nenhuma despesa foi selecionada.",
+        duration: 3000,
+      });
+    }
+  };
 
   return (
     <div className="w-full">
@@ -208,10 +236,8 @@ export function SavingsPage() {
           className="max-w-sm"
         />
         <div className="space-x-2">
-          <DialogExpense />
-          <Button variant="outline" size="sm" className="bg-red-500 text-white">
-            Excluir Despesa
-          </Button>
+          <DialogExpense buttonClassName="bg-green-700 text-white hover:bg-green-600" />
+          <DialogDeleteConfirmation onConfirm={handleDeleteSelectedRows} />
         </div>
       </div>
       <div className="rounded-md border">
