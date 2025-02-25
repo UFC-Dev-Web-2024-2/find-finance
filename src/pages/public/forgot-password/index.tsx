@@ -15,6 +15,12 @@ type FormValidations = {
     email?: string;
 };
 
+type fetchUserResponse = {
+    id: number;
+    email: string;
+    resetCode: string;
+}[];
+
 export function ForgotPasswordPage() {
     const navigate = useNavigate();
     
@@ -29,20 +35,24 @@ export function ForgotPasswordPage() {
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setIsSubmittingForm(true);
-
+    
         try {
             const formData = ForgotPasswordSchema.parse({email});
+    
+            const response = await fetch("http://localhost:3001/users?email=" + formData.email);
+            const users: fetchUserResponse = await response.json();
+    
             await new Promise((resolve, reject) => {
                 setTimeout(() => {
-                    if (
-                        formData.email === "admin@gmail.com"
-                    ) {
+                    if (users.length > 0) {
                         return resolve(navigate("/forgot-password/code-confirmation"));
-                    }
+                    } else {
+                        return reject(new Error("Não encontramos nenhuma conta associada a esse e-mail."));
+                    }                    
+                }, 1000)
+            })
 
-                    return reject(new Error("Não encontramos nenhuma conta associada a esse e-mail."));
-                }, 1000);
-            });
+    
         } catch (error) {
             if (error instanceof z.ZodError) {
                 setFormValidation(error.flatten().fieldErrors);
@@ -53,6 +63,7 @@ export function ForgotPasswordPage() {
             setIsSubmittingForm(false);
         }
     }
+    
     return (
         <main className="flex flex-col items-center gap-8">
             <LogoIcon />
