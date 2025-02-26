@@ -8,12 +8,18 @@ import { useNavigate } from "react-router";
 import * as z from "zod";
 
 const CodeConfirmationSchema = z.object({
-  code: z.string().length(6, "Código inválido").regex(/[A-Za-z]/, "") .regex(/\d/, "")
+  code: z.string().length(6, "Código inválido").regex(/[A-Za-z]/, "Código incorreto") .regex(/\d/, "")
 });
 
 type FormValidations = {
     code?: string;
 };
+
+type fetchUserResponse = {
+    id: number;
+    email: string;
+    resetCode: string;
+}[];
 
 export function CodeConfirmationPage() {
     const navigate = useNavigate();
@@ -26,7 +32,6 @@ export function CodeConfirmationPage() {
     const isInvalidForm = !code;
     const isDisabledButtonSubmit = isInvalidForm || isSubmittingForm;
 
-    const [isResending, setIsResending] = useState(false);
     const [resendTimer, setResendTimer] = useState(0);
     const [message, setMessage] = useState(
         <>
@@ -45,15 +50,20 @@ export function CodeConfirmationPage() {
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setIsSubmittingForm(true);
-
+    
         try {
             const formData = CodeConfirmationSchema.parse({code});
+            const response = await fetch("http://localhost:3001/users?resetCode=" + formData.code);
+            const users: fetchUserResponse = await response.json();
+
             await new Promise((resolve, reject) => {
                 setTimeout(() => {
-                    if (
-                        formData.code === "12345a" 
-                    ) {
-                        return resolve(navigate("/forgot-password/create-new-password"));
+                    if (users.length > 0) {
+                        if (
+                            users[0].resetCode === formData.code
+                        ) {
+                            return resolve(navigate("/forgot-password/create-new-password"));
+                        }                        
                     }
 
                     return reject(new Error("Código incorreto"));
@@ -61,21 +71,20 @@ export function CodeConfirmationPage() {
             });
         } catch (error) {
             if (error instanceof z.ZodError) {
-                    setFormValidation(error.flatten().fieldErrors);
+                setFormValidation(error.flatten().fieldErrors);
             } else if (error instanceof Error) {
-                    setFormValidation({ code: error.message });
+                setFormValidation({ code: error.message });
             }
         } finally {
             setIsSubmittingForm(false);
         }
     }
+    
 
     function handleResendCode() {
         if (resendTimer > 0) return;
         
-        setIsResending(true);
         setResendTimer(60);
-        setTimeout(() => setIsResending(false), 1000);
         
         setMessage(
             <>
@@ -104,6 +113,7 @@ export function CodeConfirmationPage() {
                             placeholder="Ex. 11111a"
                             onChange={({ target }) => setCode(target.value)}
                             className={`border ${isInvalidCode ? "border-red-500" : "border-gray-200"}`}
+                            maxLength={6}
                         />
                             {isInvalidCode && (
                                 <span className="text-red-600 text-xs">

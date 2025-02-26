@@ -22,6 +22,12 @@ type FormValidations = {
     confirmPassword?: string;
 };
 
+type fetchUserResponse = {
+    id: number;
+    email: string;
+    resetCode: string;
+}[];
+
 export function CreateNewPasswordPage() {
     const navigate = useNavigate();
     
@@ -48,14 +54,31 @@ export function CreateNewPasswordPage() {
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setIsSubmittingForm(true);
-
+    
         try {
             const formData = ForgotPasswordSchema.parse({ password, confirmPassword });
-            await new Promise((resolve) => {
-                setTimeout(() => {
-                    return resolve(navigate("/c"));
-                }, 1000);
-            });
+    
+            const response = await fetch("http://localhost:3001/users?email=admin@gmail.com");
+            const users: fetchUserResponse = await response.json();
+    
+            if (users.length > 0) {
+                const user = users[0];
+                await fetch(`http://localhost:3001/users/${user.id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ password: formData.password }),
+                });
+    
+                await new Promise((resolve) => {
+                    setTimeout(() => {
+                        return resolve(navigate("/"));
+                    }, 1000);
+                });
+            } else {
+                throw new Error("Usuário não encontrado");
+            }
         } catch (error) {
             if (error instanceof z.ZodError) {
                 setFormValidation(error.flatten().fieldErrors);
@@ -129,7 +152,7 @@ export function CreateNewPasswordPage() {
                         className="w-full"
                         disabled={isDisabledButtonSubmit}
                     >
-                        {isSubmittingForm ? "Acessando..." : "Resetar senha"}
+                        {isSubmittingForm ? "Enviando nova senha..." : "Resetar senha"}
                     </Button>
                     <Button
                         variant="link"
