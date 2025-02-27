@@ -50,7 +50,7 @@ export function RegisterPage() {
       const resetCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       const formData = RegisterSchema.parse({username, fullName, email, password, confirmPassword});
 
-      const response = await fetch("http://localhost:3000/users", {
+      const response = await fetch("http://localhost:3001/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

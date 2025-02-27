@@ -7,7 +7,7 @@ export function AccountConfirmationStatusPage() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      navigate("/login");
+      navigate("/dashboard");
     }, 5000);
 
     return () => clearTimeout(timeout);

@@ -35,7 +35,7 @@ export function EmailConfirmationPage() {
 
     try {
       const formData = CodeConfirmationSchema.parse({ code });
-      const response = await fetch(`http://localhost:3000/users?email=${email}`);
+      const response = await fetch(`http://localhost:3001/users?email=${email}`);
       const users = await response.json();
 
       if (users.length === 0) {
