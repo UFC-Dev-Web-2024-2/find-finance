@@ -40,15 +40,22 @@ export function LoginPage() {
 
     try {
       const formData = LoginSchema.parse({ email, password });
+
+      const response = await fetch(
+        `http://localhost:3000/users?email=${formData.email}&password=${formData.password}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const user = await response.json();
+
       await new Promise((resolve, reject) => {
         setTimeout(() => {
-          if (
-            formData.email === "admin@gmail.com" &&
-            formData.password === "123456"
-          ) {
-            return resolve(navigate("/dashboard"));
-          }
-
+          if (user.length) return resolve(navigate("/dashboard"));
           return reject(alert("E-mail ou senha inválidos. Tente novamente."));
         }, 1000);
       });
