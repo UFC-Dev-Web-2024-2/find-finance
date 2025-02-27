@@ -23,7 +23,7 @@ export function EmailConfirmationPage() {
   const [code, setCode] = useState("");
   const [formValidations, setFormValidation] = useState<FormValidations>();
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
-  const [email] = useState("danielalmeida@gmail.com");
+  const [email] = useState(() => localStorage.getItem("userEmail") || "");
 
   const isInvalidCode = Boolean(formValidations?.code);
   const isInvalidForm = !code;
@@ -35,15 +35,19 @@ export function EmailConfirmationPage() {
 
     try {
       const formData = CodeConfirmationSchema.parse({ code });
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (formData.code === "8G5HB9") {
-            return resolve(navigate("/register/account-confirmation-status"));
-          }
+      const response = await fetch(`http://localhost:3001/users?email=${email}`);
+      const users = await response.json();
 
-          return reject(new Error("O código informado está incorreto ou expirado."));
-        }, 1000);
-      });
+      if (users.length === 0) {
+        throw new Error("Usuário não encontrado.");
+      }
+
+      const user = users[0];
+      if (formData.code !== user.resetCode) {
+        throw new Error("O código informado está incorreto ou expirado.");
+      }
+
+      navigate("/register/account-confirmation-status")
     } catch (error) {
       if (error instanceof z.ZodError) {
         setFormValidation(error.flatten().fieldErrors);

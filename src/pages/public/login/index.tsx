@@ -42,7 +42,7 @@ export function LoginPage() {
       const formData = LoginSchema.parse({ email, password });
 
       const response = await fetch(
-        `http://localhost:3000/users?email=${formData.email}&password=${formData.password}`,
+        `http://localhost:3001/users?email=${formData.email}&password=${formData.password}`,
         {
           method: "GET",
           headers: {
