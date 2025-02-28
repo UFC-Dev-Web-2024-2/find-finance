@@ -32,37 +32,6 @@ export function ForgotPasswordPage() {
     const isInvalidForm = !email;
     const isDisabledButtonSubmit = isInvalidForm || isSubmittingForm;
 
-    // async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    //     event.preventDefault();
-    //     setIsSubmittingForm(true);
-    
-    //     try {
-    //         const formData = ForgotPasswordSchema.parse({email});
-    
-    //         const response = await fetch("http://localhost:3001/users?email=" + formData.email);
-    //         const users: fetchUserResponse = await response.json();
-    
-    //         await new Promise((resolve, reject) => {
-    //             setTimeout(() => {
-    //                 if (users.length > 0) {
-    //                     return resolve(navigate("/forgot-password/code-confirmation"));
-    //                 } else {
-    //                     return reject(new Error("Não encontramos nenhuma conta associada a esse e-mail."));
-    //                 }                    
-    //             }, 1000)
-    //         })
-
-    
-    //     } catch (error) {
-    //         if (error instanceof z.ZodError) {
-    //             setFormValidation(error.flatten().fieldErrors);
-    //           } else if (error instanceof Error) {
-    //             setFormValidation({ email: error.message });
-    //         }
-    //     } finally {
-    //         setIsSubmittingForm(false);
-    //     }
-    // }
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setIsSubmittingForm(true);

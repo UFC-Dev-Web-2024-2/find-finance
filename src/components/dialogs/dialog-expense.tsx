@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { v4 as uuidv4 } from "uuid";
 
 import { useExpense } from "@/context/ExpenseContext";
 import { useToast } from "@/hooks/use-toast";
@@ -71,9 +70,8 @@ export function DialogExpense({ buttonClassName }: DialogExpenseProps) {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+  
     addExpense({
-      id: uuidv4(),
       title: formData.title,
       registerType: formData.registerType as "expense" | "income",
       description: formData.description,
@@ -84,16 +82,17 @@ export function DialogExpense({ buttonClassName }: DialogExpenseProps) {
           ? new Date().toISOString().split("T")[0]
           : formData.date,
     });
-
+  
     toast({
       variant: "sucess",
       description: "Sua despesa foi salva com sucesso!",
       duration: 3000,
     });
-
+  
     navigate("/savings");
     setOpen(false);
   };
+  
 
   useEffect(() => {
     if (open) {
