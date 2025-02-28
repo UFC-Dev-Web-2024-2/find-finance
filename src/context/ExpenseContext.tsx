@@ -32,30 +32,28 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
   }, []);
   
 
-  const addExpense = async (expense: Savings) => {
+  const addExpense = async (expense: Omit<Savings, "id">) => {
     const userId = "1";
+  
     try {
-      setExpenses((prevExpenses) => [...prevExpenses, expense]);
-
       const response = await fetch("https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/expenses", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title: expense.title,
-          registerType: expense.registerType,
-          description: expense.description,
-          value: expense.value,
-          category: expense.category,
-          date: expense.date,
-          userId: userId
+          ...expense,
+          userId,
         }),
       });
-
+  
       if (!response.ok) {
-        console.error("Erro ao adicionar despesa no servidor:", response.statusText);
+        throw new Error(`Erro ao adicionar despesa no servidor: ${response.statusText}`);
       }
+  
+      const newExpense: Savings = await response.json();
+      setExpenses((prevExpenses) => [...prevExpenses, newExpense]); 
+  
     } catch (error) {
       console.error("Erro ao adicionar despesa:", error);
     }
@@ -63,10 +61,6 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
 
   const deleteExpenses = async (ids: string[]) => {
     try {
-      const updatedExpenses = expenses.filter((exp) => !ids.includes(exp.id));
-  
-      setExpenses(updatedExpenses);
-  
       for (let id of ids) {
         const response = await fetch(`https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/expenses/${id}`, {
           method: "DELETE",
@@ -74,9 +68,11 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
   
         if (!response.ok) {
           console.error(`Erro ao deletar a despesa com id ${id}:`, response.statusText);
+          return;
         }
       }
   
+      setExpenses((prevExpenses) => prevExpenses.filter((exp) => !ids.includes(exp.id!)));
       console.log("Despesas deletadas com sucesso!");
     } catch (error) {
       console.error("Erro ao deletar as despesas:", error);
