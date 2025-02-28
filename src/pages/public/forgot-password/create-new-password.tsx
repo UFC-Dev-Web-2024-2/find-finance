@@ -22,6 +22,12 @@ type FormValidations = {
     confirmPassword?: string;
 };
 
+type fetchUserResponse = {
+    id: number;
+    email: string;
+    resetCode: string;
+}[];
+
 export function CreateNewPasswordPage() {
     const navigate = useNavigate();
     
@@ -48,14 +54,38 @@ export function CreateNewPasswordPage() {
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setIsSubmittingForm(true);
-
+    
         try {
             const formData = ForgotPasswordSchema.parse({ password, confirmPassword });
-            await new Promise((resolve) => {
-                setTimeout(() => {
-                    return resolve(navigate("/c"));
-                }, 1000);
-            });
+    
+            const response = await fetch("https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/users?email=email@email.com");
+            const users: fetchUserResponse = await response.json();
+    
+            if (users.length > 0) {
+                const user = users[0];
+    
+                const updateResponse = await fetch(`https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/users/${user.id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        password: formData.password,
+                    }),
+                });
+    
+                if (!updateResponse.ok) {
+                    throw new Error("Erro ao atualizar a senha.");
+                }
+    
+                await new Promise((resolve) => {
+                    setTimeout(() => {
+                        return resolve(navigate("/"));
+                    }, 1000);
+                });
+            } else {
+                throw new Error("Usuário não encontrado");
+            }
         } catch (error) {
             if (error instanceof z.ZodError) {
                 setFormValidation(error.flatten().fieldErrors);
@@ -66,6 +96,7 @@ export function CreateNewPasswordPage() {
             setIsSubmittingForm(false);
         }
     }
+    
 
     return (
         <main className="flex flex-col items-center gap-8">
@@ -129,7 +160,7 @@ export function CreateNewPasswordPage() {
                         className="w-full"
                         disabled={isDisabledButtonSubmit}
                     >
-                        {isSubmittingForm ? "Acessando..." : "Resetar senha"}
+                        {isSubmittingForm ? "Enviando nova senha..." : "Resetar senha"}
                     </Button>
                     <Button
                         variant="link"

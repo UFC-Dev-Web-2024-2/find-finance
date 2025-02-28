@@ -37,18 +37,34 @@ export function LoginPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmittingForm(true);
-
+  
     try {
       const formData = LoginSchema.parse({ email, password });
+
+      const response = await fetch(
+        `https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/users`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      const users = await response.json();
+  
+      const user = users.find(
+        (user: { email: string; password: string }) =>
+          user.email === formData.email && user.password === formData.password
+      );
+  
       await new Promise((resolve, reject) => {
         setTimeout(() => {
-          if (
-            formData.email === "admin@gmail.com" &&
-            formData.password === "123456"
-          ) {
+          if (user) {
+            console.log(user); 
             return resolve(navigate("/dashboard"));
           }
-
+  
           return reject(alert("E-mail ou senha inválidos. Tente novamente."));
         }, 1000);
       });
@@ -60,6 +76,7 @@ export function LoginPage() {
       setIsSubmittingForm(false);
     }
   }
+  
 
   return (
     <>

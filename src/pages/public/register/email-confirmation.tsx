@@ -23,7 +23,7 @@ export function EmailConfirmationPage() {
   const [code, setCode] = useState("");
   const [formValidations, setFormValidation] = useState<FormValidations>();
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
-  const [email] = useState("danielalmeida@gmail.com");
+  const [email] = useState(() => localStorage.getItem("userEmail") || "");
 
   const isInvalidCode = Boolean(formValidations?.code);
   const isInvalidForm = !code;
@@ -32,18 +32,25 @@ export function EmailConfirmationPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmittingForm(true);
-
+  
     try {
       const formData = CodeConfirmationSchema.parse({ code });
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (formData.code === "8G5HB9") {
-            return resolve(navigate("/register/account-confirmation-status"));
-          }
+  
+      const response = await fetch("https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/users");
+      const users = await response.json();
+  
+      const user = users.find((user: { email: string }) => user.email === email);
+  
+      if (!user) {
+        throw new Error("Usuário não encontrado.");
+      }
+  
+      if (formData.code !== user.resetCode) {
+        throw new Error("O código informado está incorreto ou expirado.");
+      }
 
-          return reject(new Error("O código informado está incorreto ou expirado."));
-        }, 1000);
-      });
+      navigate("/register/account-confirmation-status");
+  
     } catch (error) {
       if (error instanceof z.ZodError) {
         setFormValidation(error.flatten().fieldErrors);
@@ -54,6 +61,7 @@ export function EmailConfirmationPage() {
       setIsSubmittingForm(false);
     }
   }
+  
 
   return (
     <main className="flex flex-col items-center gap-8">

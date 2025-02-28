@@ -15,6 +15,12 @@ type FormValidations = {
     email?: string;
 };
 
+type fetchUserResponse = {
+    id: number;
+    email: string;
+    resetCode: string;
+}[];
+
 export function ForgotPasswordPage() {
     const navigate = useNavigate();
     
@@ -26,33 +32,71 @@ export function ForgotPasswordPage() {
     const isInvalidForm = !email;
     const isDisabledButtonSubmit = isInvalidForm || isSubmittingForm;
 
+    // async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    //     event.preventDefault();
+    //     setIsSubmittingForm(true);
+    
+    //     try {
+    //         const formData = ForgotPasswordSchema.parse({email});
+    
+    //         const response = await fetch("http://localhost:3001/users?email=" + formData.email);
+    //         const users: fetchUserResponse = await response.json();
+    
+    //         await new Promise((resolve, reject) => {
+    //             setTimeout(() => {
+    //                 if (users.length > 0) {
+    //                     return resolve(navigate("/forgot-password/code-confirmation"));
+    //                 } else {
+    //                     return reject(new Error("Não encontramos nenhuma conta associada a esse e-mail."));
+    //                 }                    
+    //             }, 1000)
+    //         })
+
+    
+    //     } catch (error) {
+    //         if (error instanceof z.ZodError) {
+    //             setFormValidation(error.flatten().fieldErrors);
+    //           } else if (error instanceof Error) {
+    //             setFormValidation({ email: error.message });
+    //         }
+    //     } finally {
+    //         setIsSubmittingForm(false);
+    //     }
+    // }
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setIsSubmittingForm(true);
-
+    
         try {
             const formData = ForgotPasswordSchema.parse({email});
-            await new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    if (
-                        formData.email === "admin@gmail.com"
-                    ) {
-                        return resolve(navigate("/forgot-password/code-confirmation"));
-                    }
+    
+            const response = await fetch("https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/users?email=" + formData.email);
+            
+            if (!response.ok) {
+                throw new Error("Não encontramos nenhuma conta associada a esse e-mail.");
+            }
+    
+            const users: fetchUserResponse = await response.json();
 
-                    return reject(new Error("Não encontramos nenhuma conta associada a esse e-mail."));
-                }, 1000);
+            if (users.length === 0) {
+                throw new Error("Não encontramos nenhuma conta associada a esse e-mail.");
+            }
+
+            await new Promise((resolve) => {
+                setTimeout(() => resolve(navigate("/forgot-password/code-confirmation")), 1000);
             });
+    
         } catch (error) {
             if (error instanceof z.ZodError) {
                 setFormValidation(error.flatten().fieldErrors);
-              } else if (error instanceof Error) {
+            } else if (error instanceof Error) {
                 setFormValidation({ email: error.message });
             }
         } finally {
             setIsSubmittingForm(false);
         }
     }
+    
     return (
         <main className="flex flex-col items-center gap-8">
             <LogoIcon />

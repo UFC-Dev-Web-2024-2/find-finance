@@ -45,22 +45,48 @@ export function RegisterPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmittingForm(true);
-
+  
     try {
+      const resetCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
       const formData = RegisterSchema.parse({ username, fullName, email, password, confirmPassword });
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          resetCode,
+        }),
+      });
 
-      alert("Conta criada com sucesso!");
+      if (!response.ok) {
+        throw new Error("Erro ao registrar nova conta.");
+      }
+
+      localStorage.setItem("userEmail", formData.email);
       navigate("/register/email-confirmation");
+  
     } catch (error) {
       if (error instanceof z.ZodError) {
         setFormValidations(error.flatten().fieldErrors);
+      } else {
+        if (error instanceof Error) {
+          alert(error.message);
+        } else {
+          alert("Ocorreu um erro desconhecido.");
+        }
       }
     } finally {
       setIsSubmittingForm(false);
     }
   }
+  
 
   return (
     <>
