@@ -58,18 +58,25 @@ export function CreateNewPasswordPage() {
         try {
             const formData = ForgotPasswordSchema.parse({ password, confirmPassword });
     
-            const response = await fetch("http://localhost:3001/users?email=admin@gmail.com");
+            const response = await fetch("https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/users?email=email@email.com");
             const users: fetchUserResponse = await response.json();
     
             if (users.length > 0) {
                 const user = users[0];
-                await fetch(`http://localhost:3001/users/${user.id}`, {
-                    method: "PATCH",
+    
+                const updateResponse = await fetch(`https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/users/${user.id}`, {
+                    method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ password: formData.password }),
+                    body: JSON.stringify({
+                        password: formData.password,
+                    }),
                 });
+    
+                if (!updateResponse.ok) {
+                    throw new Error("Erro ao atualizar a senha.");
+                }
     
                 await new Promise((resolve) => {
                     setTimeout(() => {
@@ -89,6 +96,7 @@ export function CreateNewPasswordPage() {
             setIsSubmittingForm(false);
         }
     }
+    
 
     return (
         <main className="flex flex-col items-center gap-8">

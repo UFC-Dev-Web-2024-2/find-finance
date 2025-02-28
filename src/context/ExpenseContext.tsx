@@ -15,32 +15,41 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
-        const response = await fetch("http://localhost:3000/users/1");
+        const response = await fetch("https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/expenses");
+  
         if (response.ok) {
-          const user = await response.json();
-          setExpenses(user.expense as Savings[]);
+          const expenses = await response.json();
+          setExpenses(expenses as Savings[]);
         } else {
-          console.error("Erro ao buscar usuário:", response.statusText);
+          console.error("Erro ao buscar despesas:", response.statusText);
         }
       } catch (error) {
         console.error("Erro ao carregar despesas:", error);
       }
     };
-
+  
     fetchExpenses();
   }, []);
+  
 
   const addExpense = async (expense: Savings) => {
+    const userId = "1";
     try {
       setExpenses((prevExpenses) => [...prevExpenses, expense]);
 
-      const response = await fetch("http://localhost:3000/users/1", {
-        method: "PATCH",
+      const response = await fetch("https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/expenses", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          expense: [...expenses, expense],
+          title: expense.title,
+          registerType: expense.registerType,
+          description: expense.description,
+          value: expense.value,
+          category: expense.category,
+          date: expense.date,
+          userId: userId
         }),
       });
 
@@ -55,26 +64,25 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
   const deleteExpenses = async (ids: string[]) => {
     try {
       const updatedExpenses = expenses.filter((exp) => !ids.includes(exp.id));
-
+  
       setExpenses(updatedExpenses);
-
-      const response = await fetch("http://localhost:3000/users/1", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          expense: updatedExpenses,
-        }),
-      });
-
-      if (!response.ok) {
-        console.error("Erro ao deletar despesas no servidor:", response.statusText);
+  
+      for (let id of ids) {
+        const response = await fetch(`https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/expenses/${id}`, {
+          method: "DELETE",
+        });
+  
+        if (!response.ok) {
+          console.error(`Erro ao deletar a despesa com id ${id}:`, response.statusText);
+        }
       }
+  
+      console.log("Despesas deletadas com sucesso!");
     } catch (error) {
-      console.error("Erro ao deletar despesas:", error);
+      console.error("Erro ao deletar as despesas:", error);
     }
   };
+  
 
   return (
     <ExpenseContext.Provider value={{ expenses, addExpense, deleteExpenses }}>
