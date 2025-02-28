@@ -8,7 +8,9 @@ import { useNavigate } from "react-router";
 import * as z from "zod";
 
 const CodeConfirmationSchema = z.object({
-  code: z.string().length(6, "Código inválido").regex(/[A-Za-z]/, "Código incorreto") .regex(/\d/, "")
+    code: z.string()
+      .length(6, "Código inválido")
+      .regex(/^[A-Z]{6}$/, "O código deve ser composto apenas por 6 letras maiúsculas.")
 });
 
 type FormValidations = {
@@ -36,7 +38,7 @@ export function CodeConfirmationPage() {
     const [message, setMessage] = useState(
         <>
             Um código de verificação de seis dígitos foi enviado para o e-mail 
-            <span className="text-slate-700 font-semibold"> admin@gmail.com</span>, informe ele abaixo.         
+            <span className="text-slate-700 font-semibold"> email@email.com</span>, informe ele abaixo.         
         </>
     );
 
@@ -50,25 +52,24 @@ export function CodeConfirmationPage() {
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setIsSubmittingForm(true);
-    
+        
         try {
-            const formData = CodeConfirmationSchema.parse({code});
-            const response = await fetch("http://localhost:3001/users?resetCode=" + formData.code);
+            const formData = CodeConfirmationSchema.parse({ code });
+        
+            const response = await fetch(`https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/users?resetCode=${formData.code}`);
+
+            if (!response.ok) {
+                throw new Error("Erro ao buscar usuário.");
+            }
+        
             const users: fetchUserResponse = await response.json();
-
-            await new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    if (users.length > 0) {
-                        if (
-                            users[0].resetCode === formData.code
-                        ) {
-                            return resolve(navigate("/forgot-password/create-new-password"));
-                        }                        
-                    }
-
-                    return reject(new Error("Código incorreto"));
-                }, 1000);
-            });
+        
+            if (users.length === 0 || users[0].resetCode !== formData.code) {
+                throw new Error("Código incorreto ou expirado.");
+            }
+        
+            navigate("/forgot-password/create-new-password");
+        
         } catch (error) {
             if (error instanceof z.ZodError) {
                 setFormValidation(error.flatten().fieldErrors);
@@ -79,6 +80,7 @@ export function CodeConfirmationPage() {
             setIsSubmittingForm(false);
         }
     }
+    
     
 
     function handleResendCode() {
