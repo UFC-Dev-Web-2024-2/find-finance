@@ -176,6 +176,8 @@ export function SavingsPage() {
   }>({});
   const { expenses, deleteExpenses } = useExpense();
 
+  console.log(expenses)
+
   const table = useReactTable({
     data: expenses,
     columns,

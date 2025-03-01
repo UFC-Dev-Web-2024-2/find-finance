@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { Savings } from "@/pages/private/savings";
+import { useUserLogged } from "@/hooks/use-user-logged";
 
 interface ExpenseContextType {
   expenses: Savings[];
@@ -11,11 +12,12 @@ const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
 
 export function ExpenseProvider({ children }: { children: React.ReactNode }) {
   const [expenses, setExpenses] = useState<Savings[]>([]);
+  const { user } = useUserLogged();
 
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
-        const response = await fetch("https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/expenses");
+        const response = await fetch("https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/expenses?userId=" + user.id);
   
         if (response.ok) {
           const expenses = await response.json();
@@ -28,13 +30,11 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
       }
     };
   
-    fetchExpenses();
-  }, []);
+    if (user.id) fetchExpenses();
+  }, [user.id]);
   
 
-  const addExpense = async (expense: Omit<Savings, "id">) => {
-    const userId = "1";
-  
+  const addExpense = async (expense: Omit<Savings, "id">) => {  
     try {
       const response = await fetch("https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/expenses", {
         method: "POST",
@@ -43,7 +43,7 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
         },
         body: JSON.stringify({
           ...expense,
-          userId,
+          userId: user?.id,
         }),
       });
   
@@ -61,7 +61,7 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
 
   const deleteExpenses = async (ids: string[]) => {
     try {
-      for (let id of ids) {
+      for (const id of ids) {
         const response = await fetch(`https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/expenses/${id}`, {
           method: "DELETE",
         });

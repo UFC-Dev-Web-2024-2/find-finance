@@ -1,5 +1,4 @@
 import { PublicLayout } from "@/layout/public/public-layout";
-import { ExpenseProvider } from "@/context/ExpenseContext";
 import { Navigate, Route, Routes as RoutesReactRouter } from "react-router";
 import { LoginPage } from "@/pages/public/login";
 import { RegisterPage } from "@/pages/public/register"
@@ -15,7 +14,7 @@ import { Toaster } from "@/components/ui/toaster";
 
 export function Routes() {
   return (
-    <ExpenseProvider>
+    <>
       <Toaster/>
       <RoutesReactRouter>
         <Route path="/" element={<PublicLayout />}>
@@ -34,6 +33,6 @@ export function Routes() {
           <Route path="savings" element={<SavingsPage />} />
         </Route>
       </RoutesReactRouter>
-    </ExpenseProvider>
+    </>
   );
 }
