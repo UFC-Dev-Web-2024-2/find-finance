@@ -22,7 +22,7 @@ export function Routes() {
           <Route index element={<Navigate to="/login" replace />} />
           <Route index path="login" element={<LoginPage />} />
           <Route index path ="register" element={<RegisterPage/>} />
-          <Route path="register/email-confirmation" element={<EmailConfirmationPage/>}/>
+          <Route path="register/email-confirmation/:code" element={<EmailConfirmationPage/>}/>
           <Route path="register/account-confirmation-status" element={<AccountConfirmationStatusPage/>}/>
           <Route index path="forgot-password" element={<ForgotPasswordPage/>}/>
           <Route path="forgot-password/code-confirmation/:email" element={<CodeConfirmationPage/>}/>
