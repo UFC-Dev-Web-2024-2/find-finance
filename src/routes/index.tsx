@@ -25,8 +25,8 @@ export function Routes() {
           <Route path="register/email-confirmation" element={<EmailConfirmationPage/>}/>
           <Route path="register/account-confirmation-status" element={<AccountConfirmationStatusPage/>}/>
           <Route index path="forgot-password" element={<ForgotPasswordPage/>}/>
-          <Route path="forgot-password/code-confirmation" element={<CodeConfirmationPage/>}/>
-          <Route path="forgot-password/create-new-password" element={<CreateNewPasswordPage/>} />
+          <Route path="forgot-password/code-confirmation/:email" element={<CodeConfirmationPage/>}/>
+          <Route path="forgot-password/create-new-password/:email" element={<CreateNewPasswordPage/>} />
         </Route>
         
         <Route path="/" element={<PrivateLayout />}>

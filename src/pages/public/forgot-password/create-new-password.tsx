@@ -4,7 +4,7 @@ import { LogoIcon } from "@/components/logo/logo-icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import * as z from "zod";
 
 import { Eye, EyeOff } from "lucide-react";
@@ -30,6 +30,7 @@ type fetchUserResponse = {
 
 export function CreateNewPasswordPage() {
     const navigate = useNavigate();
+    const { email } = useParams() as { email: string };
     
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -58,7 +59,7 @@ export function CreateNewPasswordPage() {
         try {
             const formData = ForgotPasswordSchema.parse({ password, confirmPassword });
     
-            const response = await fetch("https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/users?email=email@email.com");
+            const response = await fetch(`https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/users?email=${email}`);
             const users: fetchUserResponse = await response.json();
     
             if (users.length > 0) {
