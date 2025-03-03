@@ -52,7 +52,7 @@ export function ForgotPasswordPage() {
             }
 
             await new Promise((resolve) => {
-                setTimeout(() => resolve(navigate("/forgot-password/code-confirmation")), 1000);
+                setTimeout(() => resolve(navigate(`/forgot-password/code-confirmation/${email}`)), 1000);
             });
     
         } catch (error) {

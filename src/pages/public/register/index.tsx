@@ -70,8 +70,7 @@ export function RegisterPage() {
       }
 
       localStorage.setItem("userEmail", formData.email);
-      navigate("/register/email-confirmation");
-  
+      navigate(`/register/email-confirmation/${resetCode}`);
     } catch (error) {
       if (error instanceof z.ZodError) {
         setFormValidations(error.flatten().fieldErrors);
