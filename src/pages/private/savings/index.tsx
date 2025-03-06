@@ -43,7 +43,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useExpense } from "@/context/ExpenseContext";
 
 export type Savings = {
-  id: string;
+  id?: string;
   title: string;
   registerType: "expense" | "income";
   description: string;
@@ -176,10 +176,12 @@ export function SavingsPage() {
   }>({});
   const { expenses, deleteExpenses } = useExpense();
 
+  console.log(expenses)
+
   const table = useReactTable({
     data: expenses,
     columns,
-    getRowId: (row) => row.id.toString(),
+    getRowId: (row) => row.id!.toString(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),

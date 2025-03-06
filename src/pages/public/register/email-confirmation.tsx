@@ -3,8 +3,8 @@ import { FormLabel } from "@/components/form/form-label";
 import { LogoIcon } from "@/components/logo/logo-icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router";
 import * as z from "zod";
 
 const CodeConfirmationSchema = z.object({
@@ -19,6 +19,7 @@ type FormValidations = {
 
 export function EmailConfirmationPage() {
   const navigate = useNavigate();
+  const { code: resetCode } = useParams() as { code: string };	
 
   const [code, setCode] = useState("");
   const [formValidations, setFormValidation] = useState<FormValidations>();
@@ -62,6 +63,9 @@ export function EmailConfirmationPage() {
     }
   }
   
+  useEffect(() => {
+    if (resetCode) alert(`Seu código de verificação: ${resetCode}`);
+  }, [resetCode])
 
   return (
     <main className="flex flex-col items-center gap-8">

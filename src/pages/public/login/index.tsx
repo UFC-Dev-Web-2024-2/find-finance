@@ -61,7 +61,7 @@ export function LoginPage() {
       await new Promise((resolve, reject) => {
         setTimeout(() => {
           if (user) {
-            console.log(user); 
+            localStorage.setItem("@findfinance:user", JSON.stringify(user));
             return resolve(navigate("/dashboard"));
           }
   

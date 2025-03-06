@@ -4,13 +4,12 @@ import { LogoIcon } from "@/components/logo/logo-icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import * as z from "zod";
 
 const CodeConfirmationSchema = z.object({
     code: z.string()
-      .length(6, "Código inválido")
-      .regex(/^[A-Z]{6}$/, "O código deve ser composto apenas por 6 letras maiúsculas.")
+      .length(6, "O código deve ser composto por 6 caracteres.")
 });
 
 type FormValidations = {
@@ -25,6 +24,7 @@ type fetchUserResponse = {
 
 export function CodeConfirmationPage() {
     const navigate = useNavigate();
+    const { email } = useParams() as { email: string };
     
     const [code, setCode] = useState("");
     const [formValidations, setFormValidation] = useState<FormValidations>();
@@ -38,7 +38,7 @@ export function CodeConfirmationPage() {
     const [message, setMessage] = useState(
         <>
             Um código de verificação de seis dígitos foi enviado para o e-mail 
-            <span className="text-slate-700 font-semibold"> email@email.com</span>, informe ele abaixo.         
+            <span className="text-slate-700 font-semibold"> {email}</span>, informe ele abaixo.         
         </>
     );
 
@@ -56,7 +56,9 @@ export function CodeConfirmationPage() {
         try {
             const formData = CodeConfirmationSchema.parse({ code });
         
-            const response = await fetch(`https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/users?resetCode=${formData.code}`);
+            const response = await fetch(`
+                https://67c08efcb9d02a9f224a3ee1.mockapi.io/api/v3/users?email=${email}&resetCode=${formData.code}`,
+            );
 
             if (!response.ok) {
                 throw new Error("Erro ao buscar usuário.");
@@ -68,7 +70,7 @@ export function CodeConfirmationPage() {
                 throw new Error("Código incorreto ou expirado.");
             }
         
-            navigate("/forgot-password/create-new-password");
+            navigate(`/forgot-password/create-new-password/${email}`);
         
         } catch (error) {
             if (error instanceof z.ZodError) {

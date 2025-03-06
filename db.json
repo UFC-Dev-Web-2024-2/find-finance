@@ -5,7 +5,7 @@
       "name": "admin",
       "email": "admin@gmail.com",
       "password": "12345678",
-      "resetCode": "12345a",
+      "resetCode": "ADETRE",
       "expense": []
     }
   ]
